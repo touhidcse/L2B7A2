@@ -20,6 +20,6 @@ const registerUserIntoDB = async (payload: IUser) => {
     return result;
 }
 
-export const userService = {
+export  const userService = {
     registerUserIntoDB,
 }

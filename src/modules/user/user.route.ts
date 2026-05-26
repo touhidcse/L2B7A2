@@ -4,9 +4,12 @@ import { userController } from "./user.controller";
 const router = Router();
 
 
-
-
-
-export const userRouter = router;
-
 router.post('/signup', userController.registerUser)
+
+
+
+
+
+
+export const userRoute = router;
+
