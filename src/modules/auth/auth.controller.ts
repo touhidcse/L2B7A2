@@ -30,7 +30,7 @@ const loginUser = async (req: Request, res: Response) => {
             statusCode:status. UNAUTHORIZED,
             success:false,
             message:error.message,
-            error:error
+            errors:error.error
         })
     }
 }
