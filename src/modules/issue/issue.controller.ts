@@ -3,6 +3,7 @@ import { issueService } from "./issue.service"
 import sendResponse from "../../utility/sendResponse";
 import status from "http-status";
 import { type JwtPayload } from "jsonwebtoken";
+import type { IGetIssuesQuery } from "./issue.interface";
 
 
 const createIssue = async (req: Request, res: Response) => {
@@ -30,8 +31,34 @@ const createIssue = async (req: Request, res: Response) => {
 }
 
 
+const getAllIssues = async (
+  req: Request<{}, {}, {}, IGetIssuesQuery>,
+  res: Response
+) => {
+  try {
+    const result = await issueService.getAllIssuesFromDB(req.query);
+
+    sendResponse(res, {
+      statusCode: status.OK,
+      success: true,
+      message: "Issues retrieved successfully",
+      data: result,
+    });
+  } catch (error : any) {
+
+    sendResponse(res, {
+      statusCode: status.BAD_REQUEST,
+      success: false,
+      message: error.message,
+      errors: error.message,
+    });
+  }
+};
+
+
 export const issueController = {
     createIssue,
+    getAllIssues
 }
 
 
