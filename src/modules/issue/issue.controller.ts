@@ -6,6 +6,8 @@ import { type JwtPayload } from "jsonwebtoken";
 import type { IGetIssuesQuery } from "./issue.interface";
 
 
+// 3. Create issue
+
 const createIssue = async (req: Request, res: Response) => {
     // console.log(req.body);
     try {
@@ -30,6 +32,7 @@ const createIssue = async (req: Request, res: Response) => {
     }
 }
 
+// Get all issues
 
 const getAllIssues = async (
   req: Request<{}, {}, {}, IGetIssuesQuery>,
@@ -55,10 +58,46 @@ const getAllIssues = async (
   }
 };
 
+// 5. Get single issue
+
+
+const getSingleIssue = async (req: Request, res: Response) => {
+  try {
+    const id = Number(req.params.id);
+console.log(id);
+    if (isNaN(id)) {
+      return sendResponse(res, {
+        statusCode: status.BAD_REQUEST,
+        success: false,
+        message: "Invalid issue id",
+        errors: "ID must be a number",
+      });
+    }
+
+    const result = await issueService.getSingleIssueFromDB(id);
+
+    return sendResponse(res, {
+      statusCode: status.OK,
+      success: true,
+      message: "Issue retrieved successfully",
+      data: result,
+    });
+  } catch (error: any) {
+    return sendResponse(res, {
+      statusCode: status.NOT_FOUND,
+      success: false,
+      message: error.message,
+      errors: error.message,
+    });
+  }
+};
+
+
 
 export const issueController = {
     createIssue,
-    getAllIssues
+    getAllIssues,
+    getSingleIssue,
 }
 
 

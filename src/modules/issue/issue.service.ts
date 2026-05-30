@@ -5,7 +5,7 @@ import type { IGetIssuesQuery, IIssueResponse, IIssueRow, IUserReporter } from "
 // 3. Create issue
 
 const createIssueIntoDB = async (
-  payload: Iissue,
+  payload: IIssueRow,
   reporter_id: number
 ) => {
 
@@ -86,7 +86,7 @@ const getAllIssuesFromDB = async (query: IGetIssuesQuery): Promise<IIssueRespons
   const issues = issuesResult.rows;
 
   if (issues.length === 0) {
-     throw Error ("No issue found")
+    throw Error("No issue found")
   }
 
   // Unique reporter ids
@@ -107,7 +107,7 @@ const getAllIssuesFromDB = async (query: IGetIssuesQuery): Promise<IIssueRespons
   // Create lookup map
 
   const usersMap = new Map<number, IUserReporter>(usersResult.rows.map((user): [number, IUserReporter] =>
-    [ user.id,user ])
+    [user.id, user])
   );
 
   // Formatted issue
@@ -136,10 +136,64 @@ const getAllIssuesFromDB = async (query: IGetIssuesQuery): Promise<IIssueRespons
   return formattedIssues;
 };
 
+// 5. Get single issue
+
+// const getSingleIssueFromDB = async (id: number): Promise<IIssueResponse[]> => {
+const getSingleIssueFromDB = async (id: number) => {
+  //  get issue
+  const issueResult = await pool.query<IIssueRow>(
+    `
+    SELECT *
+    FROM issues
+    WHERE id = $1
+    `,
+    [id]
+  );
+
+  //  console.log(issueResult);
+   
+
+  if (issueResult.rows.length === 0) {
+    throw new Error("Issue not found");
+  }
+
+  const issue = issueResult.rows[0];
+
+   console.log(issue);
+
+  // get reporter
+  
+  const userResult = await pool.query<IUserReporter>(
+    `
+    SELECT id, name, role
+    FROM users
+    WHERE id = $1
+    `,
+    [issue?.reporter_id]
+  );
+
+  if (userResult.rows.length === 0) {
+    throw new Error("Reporter not found");
+  }
+  const reporter = userResult.rows[0];
+
+  // format response
+  return {
+    id: issue?.id,
+    title: issue?.title,
+    description: issue?.description,
+    type: issue?.type,
+    status: issue?.status,
+    reporter,
+    created_at: issue?.created_at,
+    updated_at: issue?.updated_at,
+  };
+};
 
 
 
 export const issueService = {
   createIssueIntoDB,
   getAllIssuesFromDB,
+  getSingleIssueFromDB,
 };

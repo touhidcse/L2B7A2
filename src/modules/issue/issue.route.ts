@@ -12,4 +12,7 @@ router.post('/issues',auth(USER_ROLE.maintainer,USER_ROLE.contributor),issueCont
 
 router.get("/issues", issueController.getAllIssues);
 
+router.get('/issues/:id',issueController.getSingleIssue)
+console.log('From router');
+
 export const issueRouter = router;
