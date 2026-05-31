@@ -2,7 +2,7 @@
 
 ## Live URL
 
-https://l2-b7-a2express-1dc0tndu0-touhidcse.vercel.app
+https://l2-b7-a2express.vercel.app
 
 ## Features
 
