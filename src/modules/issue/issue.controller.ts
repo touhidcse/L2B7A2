@@ -24,8 +24,8 @@ const createIssue = async (req: Request, res: Response) => {
     sendResponse(res, {
       statusCode: status.UNAUTHORIZED,
       success: false,
-      message: "Unauthorized access",
-      // errors: error
+      message: error.message,
+      errors: error.error
 
     })
   }
@@ -52,7 +52,7 @@ const getAllIssues = async (
       statusCode: status.BAD_REQUEST,
       success: false,
       message: error.message,
-      errors: error.message,
+      errors: error.message
     });
   }
 };

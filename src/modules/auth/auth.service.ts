@@ -25,7 +25,8 @@ const loginUserIntoDB = async (payload: {
     const correctPassword = await bcrypt.compare(password, user.password);
 
     if(!correctPassword){
-        throw new Error("Invalid Password");
+        throw new Error("Invalid Password Or Email Or Username");
+    
     }
 
     const jwtpayload = {
