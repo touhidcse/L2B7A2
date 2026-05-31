@@ -1,4 +1,5 @@
 import { pool } from "../../db";
+import { ISSUE_STATUS, USER_ROLE } from "../../types";
 import type { IGetIssuesQuery, IIssueResponse, IIssueRow, IUserReporter } from "./issue.interface";
 
 
@@ -138,7 +139,6 @@ const getAllIssuesFromDB = async (query: IGetIssuesQuery): Promise<IIssueRespons
 
 // 5. Get single issue
 
-// const getSingleIssueFromDB = async (id: number): Promise<IIssueResponse[]> => {
 const getSingleIssueFromDB = async (id: number) => {
   //  get issue
   const issueResult = await pool.query<IIssueRow>(
@@ -151,7 +151,7 @@ const getSingleIssueFromDB = async (id: number) => {
   );
 
   //  console.log(issueResult);
-   
+
 
   if (issueResult.rows.length === 0) {
     throw new Error("Issue not found");
@@ -159,10 +159,10 @@ const getSingleIssueFromDB = async (id: number) => {
 
   const issue = issueResult.rows[0];
 
-   console.log(issue);
+  console.log(issue);
 
   // get reporter
-  
+
   const userResult = await pool.query<IUserReporter>(
     `
     SELECT id, name, role
@@ -190,10 +190,108 @@ const getSingleIssueFromDB = async (id: number) => {
   };
 };
 
+// 6. Update Issue
+
+const updateIssueIntoDB = async (
+  payload: {
+    title: string;
+    description: string;
+    type: "bug" | "feature_request";
+  },
+  issueId: number,
+  userId: number,
+  role: string
+) => {
+
+  const issueResult = await pool.query(
+    `
+    SELECT *
+    FROM issues
+    WHERE id = $1
+    `,
+    [issueId]
+  );
+
+  const issue = issueResult.rows[0];
+
+  if (!issue) {
+    throw new Error("Issue not found");
+  }
+
+  // Contributor rules
+  if (role === USER_ROLE.contributor) {
+
+    if (issue.reporter_id !== userId) {
+      throw new Error(
+        "Contributor can update only own issue"
+      );
+    }
+
+    if (issue.status !== ISSUE_STATUS.open) {
+      throw new Error(
+        "Contributor can update only open issues"
+      );
+    }
+  }
+
+  // Nobody can update resolved issue
+  if (issue.status === ISSUE_STATUS.resolved) {
+    throw new Error(
+      "Cannot update resolved issue"
+    );
+  }
+
+  const { title, description, type } = payload;
+
+  const result = await pool.query(
+    `
+    UPDATE issues
+    SET
+      title = $1,
+      description = $2,
+      type = $3,
+      updated_at = NOW()
+    WHERE id = $4
+    RETURNING *
+    `,
+    [title, description, type, issueId]
+  );
+
+  return result.rows[0];
+};
+
+// 7. Delete issue
+
+const deleteIssueFromDB = async (issueId: number) => {
+  const issueResult = await pool.query(
+    `
+    SELECT *
+    FROM issues
+    WHERE id = $1
+    `,
+    [issueId]
+  );
+
+  const issue = issueResult.rows[0];
+  console.log("From delte portion of issue service:",issueResult);
+  if (!issue) {
+    throw new Error("Issue not found");
+  }
+
+  const result = await pool.query(`
+    DELETE FROM issues WHERE id=$1
+    RETURNING *
+    `, [issueId]
+  );
+  return result;
+}
+
 
 
 export const issueService = {
   createIssueIntoDB,
   getAllIssuesFromDB,
   getSingleIssueFromDB,
+  updateIssueIntoDB,
+  deleteIssueFromDB
 };

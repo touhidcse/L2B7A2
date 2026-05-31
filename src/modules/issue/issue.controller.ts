@@ -4,32 +4,33 @@ import sendResponse from "../../utility/sendResponse";
 import status from "http-status";
 import { type JwtPayload } from "jsonwebtoken";
 import type { IGetIssuesQuery } from "./issue.interface";
+import { STATUS_CODES } from "http";
 
 
 // 3. Create issue
 
 const createIssue = async (req: Request, res: Response) => {
-    // console.log(req.body);
-    try {
-        const reporter_id = (req.user as JwtPayload).id;
+  // console.log(req.body);
+  try {
+    const reporter_id = (req.user as JwtPayload).id;
 
-        // console.log(reporter_id);
-        const result = await issueService.createIssueIntoDB(req.body, reporter_id);
-        sendResponse(res, {
-            statusCode: status.CREATED,
-            success: true,
-            message: "Issue created successfully",
-            data: result.rows[0]
-        })
-    } catch (error: any) {
-        sendResponse(res, {
-            statusCode: status.UNAUTHORIZED,
-            success: false,
-            message: "Unauthorized access",
-            // errors: error
+    // console.log(reporter_id);
+    const result = await issueService.createIssueIntoDB(req.body, reporter_id);
+    sendResponse(res, {
+      statusCode: status.CREATED,
+      success: true,
+      message: "Issue created successfully",
+      data: result.rows[0]
+    })
+  } catch (error: any) {
+    sendResponse(res, {
+      statusCode: status.UNAUTHORIZED,
+      success: false,
+      message: "Unauthorized access",
+      // errors: error
 
-        })
-    }
+    })
+  }
 }
 
 // Get all issues
@@ -47,7 +48,7 @@ const getAllIssues = async (
       message: "Issues retrieved successfully",
       data: result,
     });
-  } catch (error : any) {
+  } catch (error: any) {
 
     sendResponse(res, {
       statusCode: status.BAD_REQUEST,
@@ -64,7 +65,8 @@ const getAllIssues = async (
 const getSingleIssue = async (req: Request, res: Response) => {
   try {
     const id = Number(req.params.id);
-console.log(id);
+    // console.log(id);
+
     if (isNaN(id)) {
       return sendResponse(res, {
         statusCode: status.BAD_REQUEST,
@@ -93,11 +95,71 @@ console.log(id);
 };
 
 
+// 6. Update Issue
+
+const updateIssue = async (
+  req: Request,
+  res: Response
+) => {
+  try {
+    const issueId = Number(req.params.id);
+
+    const user = req.user as JwtPayload;
+
+    const result = await issueService.updateIssueIntoDB(
+      req.body,
+      issueId,
+      user.id,
+      user.role
+    );
+
+    sendResponse(res, {
+      statusCode: status.OK,
+      success: true,
+      message: "Issue updated successfully",
+      data: result,
+    });
+  } catch (error: any) {
+
+    sendResponse(res, {
+      statusCode: status.FORBIDDEN,
+      success: false,
+      message: error.message,
+      errors: error.message,
+    });
+  }
+};
+
+// 7. Delete Issue
+
+const deleteIssue = async (req: Request, res: Response) => {
+
+  try {
+    const issueId = Number(req.params.id);
+    const result = await issueService.deleteIssueFromDB(issueId);
+    console.log('from delete portion of issue controller',result);
+    sendResponse(res,{
+      statusCode: status.OK,
+      success: true,
+      message: "Issue deleted successfully"
+    })
+  } catch (error : any) {
+    sendResponse(res,{
+      statusCode:status.FORBIDDEN,
+      success: false,
+      message: error.message
+    })
+  }
+  
+}
+
 
 export const issueController = {
-    createIssue,
-    getAllIssues,
-    getSingleIssue,
+  createIssue,
+  getAllIssues,
+  getSingleIssue,
+  updateIssue,
+  deleteIssue
 }
 
 
