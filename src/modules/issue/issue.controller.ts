@@ -4,8 +4,6 @@ import sendResponse from "../../utility/sendResponse";
 import status from "http-status";
 import { type JwtPayload } from "jsonwebtoken";
 import type { IGetIssuesQuery } from "./issue.interface";
-import { STATUS_CODES } from "http";
-
 
 // 3. Create issue
 
@@ -137,7 +135,8 @@ const deleteIssue = async (req: Request, res: Response) => {
   try {
     const issueId = Number(req.params.id);
     const result = await issueService.deleteIssueFromDB(issueId);
-    console.log('from delete portion of issue controller',result);
+    // console.log('from delete portion of issue controller',result);
+
     sendResponse(res,{
       statusCode: status.OK,
       success: true,
@@ -147,7 +146,8 @@ const deleteIssue = async (req: Request, res: Response) => {
     sendResponse(res,{
       statusCode:status.FORBIDDEN,
       success: false,
-      message: error.message
+      message: error.message,
+      
     })
   }
   
@@ -161,9 +161,3 @@ export const issueController = {
   updateIssue,
   deleteIssue
 }
-
-
-
-
-
-

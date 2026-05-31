@@ -6,8 +6,7 @@ import jwt, { type JwtPayload } from "jsonwebtoken";
 import config from "../config";
 import { pool } from "../db";
 
-
-const auth = (...roles: ROLES[]) =>{
+const auth = (...roles: ROLES[]) => {
 
     return async (req: Request, res: Response, next: NextFunction) => {
 
@@ -16,20 +15,32 @@ const auth = (...roles: ROLES[]) =>{
         try {
             const token = req.headers.authorization;
 
-            if(!token){
-                sendResponse(res,{
-                    statusCode:status.UNAUTHORIZED,
+            if (!token) {
+                return sendResponse(res, {
+                    statusCode: status.UNAUTHORIZED,
                     success: false,
                     message: "Unauthorized Access"
-                     
+
                 });
             };
-            
-            const decoded = jwt.verify(
-                token as string,
-                config.secret as string,
-            ) as JwtPayload
 
+            // This try-cathch block for invalid token check
+
+            try {
+                const decoded = jwt.verify(
+                    token,
+                    config.secret as string
+                ) as JwtPayload;
+            } catch {
+                return sendResponse(res, {
+                    statusCode: status.UNAUTHORIZED,
+                    success: false,
+                    message: "Invalid token"
+                });
+            }
+
+            const decoded = jwt.verify(token as string, config.secret as string) as JwtPayload
+            // console.log("From auth middleware",decoded);
 
             const userData = await pool.query(`
                 SELECT * FROM users WHERE email=$1
@@ -40,16 +51,16 @@ const auth = (...roles: ROLES[]) =>{
 
             const user = userData.rows[0];
 
-            if(userData.rows.length ===0){
-                sendResponse(res,{
-                    statusCode:status.NOT_FOUND,
+            if (userData.rows.length === 0) {
+                return sendResponse(res, {
+                    statusCode: status.NOT_FOUND,
                     success: false,
                     message: "User not found"
                 });
             };
 
-            if(roles.length && !roles.includes(user.role)){
-                sendResponse(res,{
+            if (roles.length && !roles.includes(user.role)) {
+                return sendResponse(res, {
                     statusCode: status.UNAUTHORIZED,
                     success: false,
                     message: "Unauthorized"
@@ -59,13 +70,12 @@ const auth = (...roles: ROLES[]) =>{
             req.user = decoded;
 
             next();
-            
+
         } catch (error) {
             next(error);
         }
-        
+
     }
 }
-
 
 export default auth;

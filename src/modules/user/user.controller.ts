@@ -19,14 +19,10 @@ const registerUser = async (req: Request, res: Response) => {
             statusCode:status.BAD_REQUEST,
             success: false,
             message: error.message,
-            errors: error    
+            errors: error.detail   
         })
     }
 }
-
-
-
-
 
 
 export const userController = {

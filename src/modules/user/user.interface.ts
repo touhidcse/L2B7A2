@@ -5,6 +5,3 @@ export interface IUser {
     password: string;
     role?: "maintainer" | "contributor" ;
 }
-
-
-

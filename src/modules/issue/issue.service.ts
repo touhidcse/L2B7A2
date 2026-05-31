@@ -159,7 +159,7 @@ const getSingleIssueFromDB = async (id: number) => {
 
   const issue = issueResult.rows[0];
 
-  console.log(issue);
+  // console.log(issue);
 
   // get reporter
 
@@ -273,7 +273,7 @@ const deleteIssueFromDB = async (issueId: number) => {
   );
 
   const issue = issueResult.rows[0];
-  console.log("From delte portion of issue service:",issueResult);
+  // console.log("From delte portion of issue service:",issueResult);
   if (!issue) {
     throw new Error("Issue not found");
   }
