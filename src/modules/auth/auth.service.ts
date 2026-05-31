@@ -1,6 +1,6 @@
 import { pool } from "../../db";
 import bcrypt from "bcryptjs";
-import jwt , {type jwtPayload } from "jsonwebtoken"
+import jwt  from "jsonwebtoken"
 import config from "../../config";
 
 const loginUserIntoDB = async (payload: {
