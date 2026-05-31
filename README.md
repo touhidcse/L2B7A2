@@ -2,13 +2,7 @@
 
 ## Live URL
 
-Add your deployed API URL here:
-
-```txt
-https://your-live-url.com
-```
-
----
+https://l2-b7-a2express-1dc0tndu0-touhidcse.vercel.app
 
 ## Features
 
